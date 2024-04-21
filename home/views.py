@@ -8,6 +8,7 @@ from .serializers import PersonSerializer, QuestionSerializer, AnswerSerializer
 from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from rest_framework import status
 from permissions import IsOwnerOrReadOnly
+from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
 
 
 class HomeView(APIView):
@@ -20,7 +21,8 @@ class HomeView(APIView):
 
 
 class QuestionListView(APIView):
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
+    throttle_classes = [AnonRateThrottle]
 
     def get(self, request):
         question = Question.objects.all()
@@ -29,7 +31,11 @@ class QuestionListView(APIView):
 
 
 class QuestionCreateView(APIView):
+    """
+    Create a new question. Only accessible for authenticated users.
+    """
     permission_classes = [IsAuthenticated]
+    serializer_class = QuestionSerializer
 
     def post(self, request):
         ser_data = QuestionSerializer(data=request.data)
